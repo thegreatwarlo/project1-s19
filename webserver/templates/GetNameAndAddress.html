@@ -1,0 +1,35 @@
+To begin, please enter your name and address, then click "continue".
+
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <div>{{data}}</div>
+
+  <div>
+    {% for n in data %}
+    <div>{{n}}</div>
+    {% endfor %}
+  </div>
+
+  <form method="POST" action="/add">
+  <p>Name: <input type="text" name="name"></p>
+  </form>
+  <form method="POST" action="/add">
+  <p>Address: <input type="text" address="address"></p>
+  </form>
+
+  <form method="POST" action="/add">
+  <input type="submit" value="Continue"></p>
+  </form>
+
+</body>
+
+
+</html>
