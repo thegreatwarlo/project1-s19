@@ -10,15 +10,16 @@
 <body>
   <h1>Today's Craft beer selection</h1>
 
-  <div>
-    {% for n in data %}
-    <p>
-    {% for x in n %}
-    <li>{{x}}</li>
-    {% endfor %}
-    </p>
-    {% endfor %}
-  </div>
+<table>
+{% for d in data%}
+<TR>
+   <TD class="c1">{{d.name}}</TD>
+   <TD class="c2">{{d.btype}}</TD>
+   <TD class="c3">{{d.brewery}}</TD>
+   <TD class="c4">{{d.price}}</TD>
+</TR>
+{% endfor %}
+</table
 
 <p><a href="/another">Cart</a></p>
 

@@ -115,34 +115,20 @@ def home():
 
 @app.route('/GetNameAndAddress', methods=['POST'])
 def GetNameAndAddress():
-  name = request.form['name']
-  address = request.form['address']  
+    name = request.form['name']
+    address = request.form['address']  
   
-  cmd = ("SELECT COUNT(*) FROM users WHERE name = :Name AND address = :Address;")
-  count = g.conn.execute(text(cmd), Name=name, Address=address)
+    cmd = ("SELECT COUNT(*) FROM users WHERE name = :Name AND address = :Address;")
+    count = g.conn.execute(text(cmd), Name=name, Address=address)
   
-  if count.fetchone()[0] > 0:
-    # user is already in users
-      cursor3 = g.conn.execute("""SELECT beers.name, beers.type, breweries.name, beers.price
-                        FROM beers
-                        LEFT JOIN breweries
-                            ON beers.brewer_id = breweries.id
-                        WHERE beers.is_available = TRUE;
-                        """
-                    )
-      items=[]
-      for result in cursor3:
-
-        items.append([result[0], result[1], result[2], result[3], "..."])
-      
-      return render_template('/storefront.html', data=items)
-
-  else:
-    # add record to users table
-    cursor2 = g.conn.execute("SELECT max(id) + 1 FROM users;")
-    max_id = cursor2.fetchone()[0]
-    cmd = "INSERT INTO users(id, name, address) VALUES (:Max_age, :Name, :Address);"
-    g.conn.execute(text(cmd), Max_age = max_id, Name = name, Address = address)
+    if count.fetchone()[0] < 1:
+        # user is already in users
+        cursor2 = g.conn.execute("SELECT max(id) + 1 FROM users;")
+        max_id = cursor2.fetchone()[0]
+        cmd = "INSERT INTO users(id, name, address) VALUES (:Max_age, :Name, :Address);"
+        g.conn.execute(text(cmd), Max_age = max_id, Name = name, Address = address)
+        
+        cursor2.close()
     
     cursor3 = g.conn.execute("""SELECT beers.name, beers.type, breweries.name, beers.price
                         FROM beers
@@ -150,10 +136,14 @@ def GetNameAndAddress():
                             ON beers.brewer_id = breweries.id
                         WHERE beers.is_available = TRUE;
                         """
-                    )
+                        )
     items=[]
     for result in cursor3:
-      items.append([result[0], result[1], result[2], result[3], "..."])
+        beer = dict(name = result[0], btype = result[1], brewery = result[2],
+                      price = result[3])
+        items.append(beer)
+    
+    
     
     return render_template('/storefront.html', data=items)
 
@@ -172,7 +162,7 @@ def storefront():
 if __name__ == "__main__":
   import click
   app.secret_key = os.urandom(12)
-  app.run(debug=True,host='0.0.0.0', port=8085)
+  app.run(debug=True,host='0.0.0.0', port=8111)
   @click.command()
   @click.option('--debug', is_flag=True)
   @click.option('--threaded', is_flag=True)
