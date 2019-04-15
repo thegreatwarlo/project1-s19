@@ -123,25 +123,41 @@ def GetNameAndAddress():
   
   if count.fetchone()[0] > 0:
     # user is already in users
-    return render_template('/storefront.html')
+      cursor3 = g.conn.execute("""SELECT beers.name, beers.type, breweries.name, beers.price
+                        FROM beers
+                        LEFT JOIN breweries
+                            ON beers.brewer_id = breweries.id
+                        WHERE beers.is_available = TRUE;
+                        """
+                    )
+      items=[]
+      for result in cursor3:
+        items.append([result[0], result[1], result[2], result[3], "..."])
+      
+      return render_template('/storefront.html', data=items)
+
   else:
     # add record to users table
     cursor2 = g.conn.execute("SELECT max(id) + 1 FROM users;")
     max_id = cursor2.fetchone()[0]
     cmd = "INSERT INTO users(id, name, address) VALUES (:Max_age, :Name, :Address);"
     g.conn.execute(text(cmd), Max_age = max_id, Name = name, Address = address)
-  
-  return render_template('/storefront.html')
+    
+    cursor3 = g.conn.execute("""SELECT beers.name, beers.type, breweries.name, beers.price
+                        FROM beers
+                        LEFT JOIN breweries
+                            ON beers.brewer_id = breweries.id
+                        WHERE beers.is_available = TRUE;
+                        """
+                    )
+    items=[]
+    for result in cursor3:
+      items.append([result[0], result[1], result[2], result[3], "..."])
+    
+    return render_template('/storefront.html', data=items)
 
 @app.route('/storefront/', methods=['POST','GET'])
 def storefront():
-    cursor = g.conn.execute("""SELECT beers.name
-                                FROM beers
-                                LEFT JOIN breweries
-                                    ON beers.brewer_id = breweries.id
-                                WHERE beers.is_available = TRUE;
-                                """
-                            )
     items = []
     
     for result in cursor:
@@ -150,12 +166,12 @@ def storefront():
     
     
     context = dict(data = items)
-    return ("storefront.html", context)
+    return ("storefront.html")
 
 if __name__ == "__main__":
   import click
   app.secret_key = os.urandom(12)
-  app.run(debug=True,host='0.0.0.0', port=8084)
+  app.run(debug=True,host='0.0.0.0', port=8085)
   @click.command()
   @click.option('--debug', is_flag=True)
   @click.option('--threaded', is_flag=True)

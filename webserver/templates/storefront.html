@@ -1,6 +1,6 @@
 <html>
   <style>
-    body{ 
+    body{
       font-size: 15pt;
       font-family: arial;
     }
@@ -9,11 +9,12 @@
 
 <body>
   <h1>Today's Craft beer selection</h1>
-  <div>{{data}}</div>
 
   <div>
     {% for n in data %}
-    <div>{{n}}</div>
+    {% for x in n %}
+    <div>{{x}}</div>
+    {% endfor %}
     {% endfor %}
   </div>
 
