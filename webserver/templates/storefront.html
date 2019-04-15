@@ -12,9 +12,11 @@
 
   <div>
     {% for n in data %}
+    <p>
     {% for x in n %}
-    <div>{{x}}</div>
+    <li>{{x}}</li>
     {% endfor %}
+    </p>
     {% endfor %}
   </div>
 

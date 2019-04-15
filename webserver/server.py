@@ -132,6 +132,7 @@ def GetNameAndAddress():
                     )
       items=[]
       for result in cursor3:
+
         items.append([result[0], result[1], result[2], result[3], "..."])
       
       return render_template('/storefront.html', data=items)
