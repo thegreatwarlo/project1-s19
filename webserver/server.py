@@ -23,30 +23,12 @@ from flask import Flask, request, render_template, g, redirect, Response, sessio
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 
-
-
-# XXX: The Database URI should be in the format of: 
-#
-#     postgresql://USER:PASSWORD@<IP_OF_POSTGRE_SQL_SERVER>/<DB_NAME>
-#
-# For example, if you had username ewu2493, password foobar, then the following line would be:
-#
-#     DATABASEURI = "postgresql://ewu2493:foobar@<IP_OF_POSTGRE_SQL_SERVER>/postgres"
-#
-# For your convenience, we already set it to the class database
-
-# Use the DB credentials you received by e-mail
 DB_USER = "cp2984"
 DB_PASSWORD = "k3cawO6Y38"
 
 DB_SERVER = "w4111.cisxo09blonu.us-east-1.rds.amazonaws.com"
 
 DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/w4111"
-
-
-#
-# This line creates a database engine that knows how to connect to the URI above
-#
 
 engine = create_engine(DATABASEURI)
 
@@ -126,34 +108,35 @@ def teardown_request(exception):
   except Exception as e:
     pass
 
-# Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  print name
-  cmd = 'INSERT INTO users(id, name, address) VALUES (:name1), (:name2)';
-  g.conn.execute(text(cmd), name1 = name, name2 = name);
-  return redirect('/')
-
 @app.route('/')
 def home():
   #if not session.get('logged_in'):
   return render_template('GetNameAndAddress.html')
 
-@app.route('/GetNameAndAddress')
+@app.route('/GetNameAndAddress', methods=['POST'])
 def GetNameAndAddress():
-  name = request.form['Name']
-  address = request.form['Address']
-  print name
-  print address
-  cmd = 'INSERT INTO users(name, address) VALUES (:name1), (:name2)';
-  g.conn.execute(text(cmd), name1 = name, name2 = name);
-  return redirect('/')
+  name = request.form['name']
+  address = request.form['address']  
+  
+  cmd = ("SELECT COUNT(*) FROM users WHERE name = :Name AND address = :Address;")
+  count = g.conn.execute(text(cmd), Name=name, Address=address)
+  
+  if count.fetchone()[0] > 0:
+    # user is already in users
+    return render_template('/anotherfile2.html')
+  else:
+    # add record to users table
+    cursor2 = g.conn.execute("SELECT max(id) + 1 FROM users;")
+    max_id = cursor2.fetchone()[0]
+    cmd = "INSERT INTO users(id, name, address) VALUES (:Max_age, :Name, :Address);"
+    g.conn.execute(text(cmd), Max_age = max_id, Name = name, Address = address);
+  
+  return render_template('/anotherfile.html')
 
 if __name__ == "__main__":
   import click
   app.secret_key = os.urandom(12)
-  app.run(debug=True,host='0.0.0.0', port=8111)
+  app.run(debug=True,host='0.0.0.0', port=8081)
   @click.command()
   @click.option('--debug', is_flag=True)
   @click.option('--threaded', is_flag=True)
