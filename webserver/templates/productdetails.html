@@ -1,0 +1,40 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+
+<h2>Detailed Beer Information</h2>
+
+<table>
+{% for d in data%}
+<TR>
+   <TD class="c1">Name: {{d.name}}</TD>
+</TR>
+<TR>
+   <TD class="c1">Brewery: {{d.brewery}}</TD>
+</TR>
+<TR>
+   <TD class="c1">Price: {{d.price}}</TD>
+</TR>
+<TR>
+   <TD class="c1">First Produced: {{d.first_produced}}</TD>
+</TR>
+<TR>
+   <TD class="c1">Type: {{d.beertype}}</TD>
+</TR>
+<TR>
+   <TD class="c1">ABV Percentage: {{d.ABV}}</TD>
+</TR>
+{% endfor %}
+</table>
+
+</body>
+
+
+</html>

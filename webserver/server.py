@@ -175,14 +175,26 @@ def GetNameAndAddress():
 
 @app.route('/productdetails/<path:id>')
 def productdetails(id):
-    return 'connor'
+    cmd = "SELECT beers.name, breweries.name, beers.price, beers.first_produced, beers.type, beers.ABV FROM beers JOIN breweries ON beers.brewer_id = breweries.id WHERE beers.id=:ID"
+    cursor = g.conn.execute(text(cmd), ID=id)
+    items=[]
+    for result in cursor:
+        beerdetail = dict(name=result[0],
+                          brewery=result[1],
+                          price=result[2],
+                          first_produced=result[3],
+                          beertype=result[4],
+                          ABV=result[5])
+        items.append(beerdetail)
+    cursor.close()
+    return render_template('productdetails.html', data=items)
 
 
 
 if __name__ == "__main__":
   import click
   app.secret_key = os.urandom(12)
-  app.run(debug=True,host='0.0.0.0', port=8112)
+  app.run(debug=True,host='0.0.0.0', port=8113)
   @click.command()
   @click.option('--debug', is_flag=True)
   @click.option('--threaded', is_flag=True)
