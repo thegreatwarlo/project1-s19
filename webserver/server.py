@@ -118,6 +118,9 @@ def GetNameAndAddress():
     name = request.form['name']
     address = request.form['address']  
     
+    if name == "" or address == "":
+        return render_template('/GetNameAndAddress.html')
+    
     first_word_name = name.split()[0].lower()
     first_word_address = address.split()[0].lower()
     
