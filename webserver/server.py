@@ -18,7 +18,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, session
+from flask import Flask, request, render_template, g, redirect, Response, session, url_for
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -173,24 +173,16 @@ def GetNameAndAddress():
         return render_template('/storefront.html', data=items)
     return render_template('/storefront_recs.html', data=items, recs = rec_items)
 
-@app.route('/productdetails/', methods=['POST','GET'])
-def productdetails():
-    items = []
-    
-    for result in cursor:
-        items.append(result[0])  # can also be accessed using result[0]
-    cursor.close()
-    
-    
-    context = dict(data = items)
-    return ("storefront.html")
+@app.route('/productdetails/<path:id>')
+def productdetails(id):
+    return 'connor'
 
 
 
 if __name__ == "__main__":
   import click
   app.secret_key = os.urandom(12)
-  app.run(debug=True,host='0.0.0.0', port=8111)
+  app.run(debug=True,host='0.0.0.0', port=8112)
   @click.command()
   @click.option('--debug', is_flag=True)
   @click.option('--threaded', is_flag=True)
