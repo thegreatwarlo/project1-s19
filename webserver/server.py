@@ -117,65 +117,69 @@ def home():
 def GetNameAndAddress():
     name = request.form['name']
     address = request.form['address']  
-  
-    cmd = ("SELECT id, name FROM users WHERE name = :Name AND address = :Address;")
-    user_q = g.conn.execute(text(cmd), Name=name, Address=address)
     
-    user = user_q.fetchone()
-    rec_items = []
-    #user does not exist
-    if user is None:
+    if name != "" and address != "":
+    
+        cmd = ("SELECT id, name FROM users WHERE name = :Name AND address = :Address;")
+        user_q = g.conn.execute(text(cmd), Name=name, Address=address)
         
-        cursor2 = g.conn.execute("SELECT max(id) + 1 FROM users;")
-        max_id = cursor2.fetchone()[0]
-        cmd = "INSERT INTO users(id, name, address) VALUES (:Max_age, :Name, :Address);"
-        g.conn.execute(text(cmd), Max_age = max_id, Name = name, Address = address)
-        
-        cursor2.close()
-        
-    # user is already in users
-    else:
-        user_id = user[0]
-        cmd = ("""
-               SELECT b.name
-               FROM recommendations r
-               INNER JOIN beers b
-               ON r.beer_id = b.id
-               WHERE r.user_id = :USER_ID
-               AND r.is_current = TRUE
-               AND b.is_available = TRUE
-               ORDER BY r.rank;
-               """)
-        recs = g.conn.execute(text(cmd), USER_ID = user_id)
-        for r in recs:
-            rec_item = dict(name = r[0])
-            rec_items.append(rec_item)
-        
-        recs.close()
+        user = user_q.fetchone()
+        rec_items = []
+        #user does not exist
+        if user is None:
             
-    
-    cursor3 = g.conn.execute("""SELECT beers.id, beers.name, beers.type, breweries.name, beers.price
-                        FROM beers
-                        LEFT JOIN breweries
-                            ON beers.brewer_id = breweries.id
-                        WHERE beers.is_available = TRUE;
-                        """
-                        )
-    items=[]
-    for result in cursor3:
-        beer = dict(id = result[0], name = result[1], btype = result[2], 
-                        brewery = result[3], price = result[4])
-        items.append(beer)
-    
-    cursor3.close()
-    
-    if len(rec_items) == 0:
-        return render_template('/storefront.html', data=items)
-    return render_template('/storefront_recs.html', data=items, recs = rec_items)
+            cursor2 = g.conn.execute("SELECT max(id) + 1 FROM users;")
+            max_id = cursor2.fetchone()[0]
+            cmd = "INSERT INTO users(id, name, address) VALUES (:Max_age, :Name, :Address);"
+            g.conn.execute(text(cmd), Max_age = max_id, Name = name, Address = address)
+            
+            cursor2.close()
+            
+        # user is already in users
+        else:
+            user_id = user[0]
+            cmd = ("""
+                   SELECT b.name
+                   FROM recommendations r
+                   INNER JOIN beers b
+                   ON r.beer_id = b.id
+                   WHERE r.user_id = :USER_ID
+                   AND r.is_current = TRUE
+                   AND b.is_available = TRUE
+                   ORDER BY r.rank;
+                   """)
+            recs = g.conn.execute(text(cmd), USER_ID = user_id)
+            for r in recs:
+                rec_item = dict(name = r[0])
+                rec_items.append(rec_item)
+            
+            recs.close()
+                
+        
+        cursor3 = g.conn.execute("""SELECT beers.id, beers.name, beers.type, breweries.name, beers.price
+                            FROM beers
+                            LEFT JOIN breweries
+                                ON beers.brewer_id = breweries.id
+                            WHERE beers.is_available = TRUE;
+                            """
+                            )
+        items=[]
+        for result in cursor3:
+            beer = dict(id = result[0], name = result[1], btype = result[2], 
+                            brewery = result[3], price = result[4])
+            items.append(beer)
+        
+        cursor3.close()
+        
+        if len(rec_items) == 0:
+            return render_template('/storefront.html', data=items)
+        return render_template('/storefront_recs.html', data=items, recs = rec_items)
+    else:
+        return render_template('/GetNameAndAddress.html')
 
 @app.route('/productdetails/<path:id>')
 def productdetails(id):
-    cmd = "SELECT beers.name, breweries.name, beers.price, beers.first_produced, beers.type, beers.ABV FROM beers JOIN breweries ON beers.brewer_id = breweries.id WHERE beers.id=:ID"
+    cmd = "SELECT beers.name, breweries.name, beers.price, beers.first_produced, beers.type, beers.ABV, hops.name FROM beers JOIN breweries ON beers.brewer_id = breweries.id JOIN hops ON beers.hop_id = hops.id WHERE beers.id=:ID"
     cursor = g.conn.execute(text(cmd), ID=id)
     items=[]
     for result in cursor:
@@ -184,7 +188,8 @@ def productdetails(id):
                           price=result[2],
                           first_produced=result[3],
                           beertype=result[4],
-                          ABV=result[5])
+                          ABV=result[5],
+                          hops=result[6])
         items.append(beerdetail)
     cursor.close()
     return render_template('productdetails.html', data=items)
