@@ -207,7 +207,7 @@ def productdetails(id):
                     FROM beers 
                     JOIN breweries ON beers.brewer_id = breweries.id 
                     JOIN hops ON beers.hop_id = hops.id 
-                    LEFT JOIN (SELECT beer_id, AVG(score) as avg_rating FROM ratings GROUP BY beer id) r
+                    LEFT JOIN (SELECT beer_id, AVG(score) as avg_rating FROM ratings GROUP BY beer_id) r
                     ON beers.id = ratings.beer_id
                     WHERE beers.id=:ID;
            """
