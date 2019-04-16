@@ -195,17 +195,33 @@ def GetNameAndAddress():
 
 @app.route('/productdetails/<path:id>')
 def productdetails(id):
-    cmd = "SELECT beers.name, breweries.name, beers.price, beers.first_produced, beers.type, beers.ABV, hops.name FROM beers JOIN breweries ON beers.brewer_id = breweries.id JOIN hops ON beers.hop_id = hops.id WHERE beers.id=:ID"
+    cmd = """SELECT beers.name, 
+                    breweries.name,
+                    breweries.location,
+                    beers.price, 
+                    beers.first_produced, 
+                    beers.type, 
+                    beers.ABV, 
+                    hops.name,
+                    r.avg_rating
+                    FROM beers 
+                    JOIN breweries ON beers.brewer_id = breweries.id 
+                    JOIN hops ON beers.hop_id = hops.id WHERE beers.id=:ID
+                    LEFT JOIN (SELECT beer_id, AVG(score) as avg_rating FROM ratings GROUP BY beer id) r
+                    ON beers.id = ratings.beer_id;
+           """
     cursor = g.conn.execute(text(cmd), ID=id)
     items=[]
     for result in cursor:
         beerdetail = dict(name=result[0],
                           brewery=result[1],
-                          price=result[2],
-                          first_produced=result[3],
+                          brewery_loc = result[2]
+                          price=result[3],
+                          first_produced=result[4],
                           beertype=result[4],
                           ABV=result[5],
-                          hops=result[6])
+                          hops=result[6],
+                          avg_rating = result[7])
         items.append(beerdetail)
     cursor.close()
     return render_template('productdetails.html', data=items)
