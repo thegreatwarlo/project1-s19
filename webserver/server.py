@@ -118,6 +118,19 @@ def GetNameAndAddress():
     name = request.form['name']
     address = request.form['address']  
     
+    first_word_name = name.split()[0].lower()
+    first_word_address = address.split()[0].lower()
+    
+    sql_injections = set(['select', 'drop', 'create', 'with', 'delete'])
+    
+    if first_word_name in sql_injections:
+        return render_template('GetNameAndAddress.html')
+    
+    if first_word_address in sql_injections:
+        return render_template('GetNameAndAddress.html')
+    
+    
+    
     if name != "" and address != "":
     
         cmd = ("SELECT id, name FROM users WHERE name = :Name AND address = :Address;")
