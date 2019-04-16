@@ -219,10 +219,10 @@ def productdetails(id):
                           brewery_loc = result[2],
                           price=result[3],
                           first_produced=result[4],
-                          beertype=result[4],
-                          ABV=result[5],
-                          hops=result[6],
-                          avg_rating = result[7])
+                          beertype=result[5],
+                          ABV=result[6],
+                          hops=result[7],
+                          avg_rating = result[8])
         items.append(beerdetail)
     cursor.close()
     return render_template('productdetails.html', data=items)
