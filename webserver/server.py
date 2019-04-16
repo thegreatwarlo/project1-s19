@@ -215,7 +215,7 @@ def productdetails(id):
     for result in cursor:
         beerdetail = dict(name=result[0],
                           brewery=result[1],
-                          brewery_loc = result[2]
+                          brewery_loc = result[2],
                           price=result[3],
                           first_produced=result[4],
                           beertype=result[4],
