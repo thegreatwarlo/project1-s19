@@ -154,7 +154,7 @@ def GetNameAndAddress():
         recs.close()
             
     
-    cursor3 = g.conn.execute("""SELECT beers.name, beers.type, breweries.name, beers.price
+    cursor3 = g.conn.execute("""SELECT beers.id, beers.name, beers.type, breweries.name, beers.price
                         FROM beers
                         LEFT JOIN breweries
                             ON beers.brewer_id = breweries.id
@@ -163,8 +163,8 @@ def GetNameAndAddress():
                         )
     items=[]
     for result in cursor3:
-        beer = dict(name = result[0], btype = result[1], brewery = result[2],
-                      price = result[3])
+        beer = dict(id = result[0], name = result[1], btype = result[2], 
+                        brewery = result[3], price = result[4])
         items.append(beer)
     
     cursor3.close()
@@ -173,8 +173,8 @@ def GetNameAndAddress():
         return render_template('/storefront.html', data=items)
     return render_template('/storefront_recs.html', data=items, recs = rec_items)
 
-@app.route('/storefront/', methods=['POST','GET'])
-def storefront():
+@app.route('/productdetails/', methods=['POST','GET'])
+def productdetails():
     items = []
     
     for result in cursor:
@@ -184,6 +184,8 @@ def storefront():
     
     context = dict(data = items)
     return ("storefront.html")
+
+
 
 if __name__ == "__main__":
   import click

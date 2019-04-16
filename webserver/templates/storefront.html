@@ -16,10 +16,11 @@
 <table>
 {% for d in data%}
 <TR>
-   <TD class="c1">{{d.name}}</TD>
-   <TD class="c2">{{d.btype}}</TD>
-   <TD class="c3">{{d.brewery}}</TD>
-   <TD class="c4">{{d.price}}</TD>
+   <TD>{{d.name}}</TD>
+   <TD>{{d.btype}}</TD>
+   <TD>{{d.brewery}}</TD>
+   <TD>{{d.price}}</TD>
+   <TD><p><a href="{{ url_for('productdetails', id = d.id)}}">More details </a></p></TD>
 </TR>
 {% endfor %}
 </table>
