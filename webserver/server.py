@@ -118,17 +118,41 @@ def GetNameAndAddress():
     name = request.form['name']
     address = request.form['address']  
   
-    cmd = ("SELECT COUNT(*) FROM users WHERE name = :Name AND address = :Address;")
-    count = g.conn.execute(text(cmd), Name=name, Address=address)
-  
-    if count.fetchone()[0] < 1:
-        # user is already in users
+    cmd = ("SELECT id, name FROM users WHERE name = :Name AND address = :Address;")
+    user_q = g.conn.execute(text(cmd), Name=name, Address=address)
+    
+    user = user_q.fetchone()
+    rec_items = []
+    #user does not exist
+    if user is None:
+        
         cursor2 = g.conn.execute("SELECT max(id) + 1 FROM users;")
         max_id = cursor2.fetchone()[0]
         cmd = "INSERT INTO users(id, name, address) VALUES (:Max_age, :Name, :Address);"
         g.conn.execute(text(cmd), Max_age = max_id, Name = name, Address = address)
         
         cursor2.close()
+        
+    # user is already in users
+    else:
+        user_id = user[0]
+        cmd = ("""
+               SELECT b.name
+               FROM recommendations r
+               INNER JOIN beers b
+               ON r.beer_id = b.id
+               WHERE r.user_id = :USER_ID
+               AND r.is_current = TRUE
+               AND b.is_available = TRUE
+               ORDER BY r.rank;
+               """)
+        recs = g.conn.execute(text(cmd), USER_ID = user_id)
+        for r in recs:
+            rec_item = dict(name = r[0])
+            rec_items.append(rec_item)
+        
+        recs.close()
+            
     
     cursor3 = g.conn.execute("""SELECT beers.name, beers.type, breweries.name, beers.price
                         FROM beers
@@ -143,9 +167,11 @@ def GetNameAndAddress():
                       price = result[3])
         items.append(beer)
     
+    cursor3.close()
     
-    
-    return render_template('/storefront.html', data=items)
+    if len(rec_items) == 0:
+        return render_template('/storefront.html', data=items)
+    return render_template('/storefront_recs.html', data=items, recs = rec_items)
 
 @app.route('/storefront/', methods=['POST','GET'])
 def storefront():
